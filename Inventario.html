@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+        
+        <title>Prueba Biblioteca</title>
+		<link rel="stylesheet" href="Inventario.css" type="text/css">
+<!--        <link rel="stylesheet" href="../jQueryUI/css/redmond/jquery-ui-1.9.1.custom.css" />-->
+        <link rel="stylesheet" href="../bootstrap/css/bootstrap.min.css" />
+	</head>
+	
+	<body>		
+        <div id="panel_principal">
+        
+        </div>	
+
+        <div id="plantillas">
+	       <li id="plantilla_vista_de_cosa" class="vista_de_cosa">
+                <div id="nombre" class="nombre_de_cosa">
+                </div>:
+                <div id="descripcion" class="descripcion_de_cosa">
+                </div>   
+            </li>
+            <div id="plantilla_administrador_de_cosas" class="administrador_de_cosas">
+                <div id="panel_alta_de_libro"> 
+                    <div>
+                        <label class="span1">
+                            Autor:
+                        </label>                     
+                        <input type="text" id="input_nombre_autor_del_alta_de_libros" class="span4"/>	
+                    </div>
+                    <div>
+                        <label class="control-label span1" for="input_titulo_del_alta_de_libros">
+                            Titulo:
+                        </label>                            
+                        <input type="text" id="input_titulo_del_alta_de_libros" class="span4"/>
+                    </div>
+                    <div class="span2">
+                        <input id="boton_agregar_del_alta_de_libros" type="button" class="btn" value="+"/>                    
+                        <input id="boton_refrescar_del_alta_de_libros" type="button" class="btn" value="refrescar"/>
+                    </div>
+                 </div>
+                <ul id="panel_libros_en_vista_de_libros" class="panel_libros_en_vista_de_libros">
+                </ul>               
+	        </div>         
+        </div>
+    </body>
+    
+    <script type="text/javascript" src="../linqjs/linq.js"></script> 
+    <script type="text/javascript" src="../JQuery/jquery-1.10.2.min.js"></script> 
+<!--    <script type="text/javascript" src="../jQueryUI/js/jquery-ui-1.9.1.custom.js"></script>-->
+    <script type="text/javascript" src="../bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../Vortexjs/Vortex.js"></script>
+    <script type="text/javascript" src="../Vortexjs/FiltrosYTransformaciones.js"></script>
+    <script type="text/javascript" src="../Vortexjs/NodoClienteHTTP.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/GeneradorDeIdMensaje.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/NodoClienteHTTP.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/NodoMultiplexor.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/NodoPortalBidi.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/NodoPortalBidiMonoFiltro.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/NodoRouter.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/PataConectora.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/Canal.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/NodoPortalConCanal.js"></script> 
+    <script type="text/javascript" src="../Vortexjs/NodoPortalBidiMonoFiltroConCanal.js"></script> 
+    <script type="text/javascript" src="../VortexComm/gadget.js"></script> 
+
+    
+
+    <script type="text/javascript" >            
+        $(function () { 
+            var id_usuario = getIdObjeto();
+            var canal_usuario = new Canal("usuario", 
+                                           new FiltroXClaveValor("Usuario", id_usuario) , 
+                                           new TrafoXClaveValor("Usuario", id_usuario));
+            var canal_biblioteca = canal_usuario.getSubCanal("MiBiblioteca", 
+                                               new FiltroXClaveValor("Biblioteca", 1) , 
+                                               new TrafoXClaveValor("Biblioteca", 1));
+            
+            var canal_haciendo = new Canal("Haciendo", 
+                                               new FiltroXClaveValor("Canal", "Haciendo") , 
+                                               new TrafoXClaveValor("Canal", "Haciendo"));
+            
+            var router =  new NodoRouter("principal"); 
+            
+            var clienteHTTP = new NodoClienteHTTP('http://kfgodel.info:62626/vortex', 100);             
+            router.conectarBidireccionalmenteCon(clienteHTTP);
+            var nodo_biblioteca = new NodoBiblioteca({canalControl: canal_biblioteca,
+                                                      canalBusquedas: canal_haciendo});           
+            router.conectarBidireccionalmenteCon(nodo_biblioteca);
+            
+            
+            var panel_principal = $('#panel_principal');
+            var plantillas = $('#plantillas');
+            var UI_biblioteca = plantillas.find('#plantilla_biblioteca').clone();
+            var plantilla_vista_edicion_de_libro = plantillas.find('#plantilla_vista_edicion_de_libro');
+            
+            var nodo_vista_biblioteca = new NodoVistaDeBiblioteca({UI:UI_biblioteca, 
+                                                                   plantilla_libro:plantilla_vista_edicion_de_libro,
+                                                                   canalControl: canal_biblioteca});
+            router.conectarBidireccionalmenteCon(nodo_vista_biblioteca);
+            
+            nodo_vista_biblioteca.dibujarEn(panel_principal);
+        });
+    </script>
+</html>
